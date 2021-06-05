@@ -14,41 +14,31 @@ for row in tbody:
     cols = row.findChildren(recursive = False)
     cols = tuple(element.text.strip().replace('%','') for element in cols)
     xl.append(cols)
-xl = xl[1:-1]
+xl = xl[1:-1] #tira a primeira e ultima linha
 xl
 
-#instalando o modulo pyodbc para se conectar ao banco de dados SQL server
-import pyodbc 
+#Conectando com o banco de dados
+import mysql.connector
 
-def retorna_conexao():
-    server = "DESKTOP-0EC1IM3"
-    database = "AcademyCoding"
-#username = “Nome do username”
-#password = “Senha”
+bd = mysql.connector.connect(
+    host="localhost",
+    user="teste",
+    passwd="teste",
+    database="academycoding"
+)
 
-#string_conexao = ‘Driver={SQL Server Native Client 11.0};Server=’+server+’;Database=’+database+’;UID=’+username+’;PWD=’+password
-    string_conexao = 'Driver={SQL Server Native Client 11.0};Server='+server+';Database='+database+';Trusted_Connection=yes;'
-
-#Abrindo a conexão com o banco de dados pyodbc
-    
-    return pyodbc.connect(string_conexao)
-    
-    cursor = retorna_conexao().cursor()
+cursor = bd.cursor()
 
 
-
-# Drop table if it already exist using execute() method.
 #Elimine a tabela se ela já existir usando o método execute ().
 
-#cursor.execute("DROP TABLE IF EXISTS WIKI ")
+cursor.execute("DROP TABLE IF EXISTS WIKI ")
 
 
-
-# Create table as per requirement
 #Criando table por requerimento
 
 sql = """create table wiki (
-  RANKINGINT int,
+  RANKING int,
   MARKET char(50),
   RETAIL_VALUE char(20),
   PHYSICAL int,
@@ -59,25 +49,31 @@ sql = """create table wiki (
 
 cursor.execute(sql)
 
-retorna_conexao().close()
+#fechando o cursor
 cursor.close()
+#desconectando do banco
+bd.close()
 
-#Save data to the table
+
 #Salvando os dados na tabela
 
-#scrap_db = pymysql.connect(h,u,p,db)
-scrap_db = pyodbc.connect(string_conexao)
-SqlServer_insert_query = """INSERT INTO WIKI (RANKING, MARKET, RETAIL_VALUE, PHYSICAL,DIGITAL,PERFORMANCE_RIGHTS,SYNCHRONIZATION) 
+bd = mysql.connector.connect(
+    host="localhost",
+    user="teste",
+    passwd="teste",
+    database="academycoding"
+)
+MySql_insert_query = """INSERT INTO WIKI (RANKING, MARKET, RETAIL_VALUE, PHYSICAL,DIGITAL,PERFORMANCE_RIGHTS,SYNCHRONIZATION) 
 VALUES (%s, %s, %s, %s ,%s, %s, %s) """
 
 records_to_insert = xl
 
-cursor = scrap_db.cursor()
-cursor.executemany(SqlServer_insert_query, records_to_insert)
-scrap_db.commit()
-print(cursor.rowcount, "Record inserted successfully into WIKI2 table")
+cursor = bd.cursor()
+cursor.executemany(MySql_insert_query, records_to_insert)
+bd.commit()
+print(cursor.rowcount, "Foi gravado com sucesso na tabela wiki!")
 
-
-# disconnect from server
-#desconectado do server
-scrap_db.close()
+#fechando o cursor
+cursor.close()
+#desconectado do banco
+bd.close()
